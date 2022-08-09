@@ -3,7 +3,7 @@ const app = express();
 const PORT = process.env.PORT || 2222;
 const path = require('path');
 
-const notes_router = require('./routes/notes_routes')
+const notes_router = require('./routes/api_routes')
 
 //share static/browser files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -12,8 +12,10 @@ app.use(express.urlencoded({ extended: true }));
 // Allow json data to be received from the client
 app.use(express.json());
 
-// Load Routes
-// localhost:2222/notes
+app.use("/assets", express.static("./assets"));
+
+
+require("./routes/html_routes")(app)
 app.use('/notes', notes_router);
 
 // Start Server
