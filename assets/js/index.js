@@ -12,13 +12,6 @@ if (window.location.pathname === '/notes') {
   noteList = document.querySelectorAll('.list-container .list-group');
 }
 
-const getNotesData = () => {
-  return $.ajax({
-    url: "/api/notes",
-    method: "GET",
-  });
-}
-
 // Show an element
 const show = (elem) => {
   elem.style.display = 'inline';

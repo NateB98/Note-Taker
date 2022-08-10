@@ -1,47 +1,41 @@
 const fs = require('fs')
-const data = JSON.parse(fs.readFileSync('./Develop/db/db.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('./db/db.json', 'utf8'));
 
-module.exports = function(app) {
+module.exports = function (app) {
 
-  // gathers all notes
-  // localhost:2222/api/notes
-  app.get('/api/notes', (req, res) => {
-    getNotesData()
-      .then(notes_data => {
-        res.json(notes_data)
-      })
-      .catch(err => console.log(err));
+  app.get("/api/notes", function (req, res) {
+    res.json(data);
   });
 
-  // creates a new note
-  app.post('/api/notes', (req, res) => {
-    getNotesData()
-      .then(notes_data => {
-        const new_note = req.body;
-        const note_id = notes_data.length ? notes_data[notes_data.length - 1].id : 0;
-        new_note.id = note_id + 1
-
-        notes_data.push(new_note);
-
-        fs.writeFileSync('./Develop/db/db.json', JSON.stringify(data), function(err) {
-          if(err) throw(err);
-        });
-        res.json(data);
-      })
-  })
-
-  // Deletes a note
-  app.delete('/api/notes', (req, res) => {
-    getNotesData()
-      .then(notes => {
-        const id = req.body.id;
-        const obj = notes.find(note => note.id === id);
-        const index = notes.indexOf(obj);
-
-        notes.splice(index, 1);
-
-        fs.writeFileSync('./Develop/db/db.json', JSON.stringify(data));
-        res.json(data)
-      });
+  app.get("/api/notes/:id", function (req, res) {
+    res.json(data[Number(req.params.id)]);
   });
+
+  app.post("/api/notes", function (req, res) {
+    let newNote = req.body;
+    let uniqueId = (data.length).toString();
+    console.log(uniqueId);
+    newNote.id = uniqueId;
+    data.push(newNote);
+
+    fs.writeFileSync("./db/db.json", JSON.stringify(data), function (err) {
+      if (err) throw (err);
+    });
+    res.json(data);
+  });
+
+  app.delete("/api/notes/:id", function (req, res) {
+    let noteId = req.params.id;
+    let newId = 0;
+    data = data.filter(currentNote => {
+      return currentNote.id != noteId;
+    });
+    for (currentNote of data) {
+      currentNote.id = newId.toString();
+      newId++;
+    }
+    fs.writeFileSync("./db/db.json", JSON.stringify(data));
+    res.json(data);
+  });
+
 }

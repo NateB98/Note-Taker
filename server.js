@@ -8,10 +8,10 @@ app.use(express.urlencoded({ extended: true }));
 // Allow json data to be received from the client
 app.use(express.json());
 //gathers the data for express parsing
-app.use('/Develop/public/assets', express.static('./assets'))
+app.use('/assets', express.static('./assets'));
 
 // Loads Routes
-require("./routes/html_routes")(app)
+require("./routes/html_routes")(app);
 require("./routes/api_routes")(app);
 
 // Start Server
