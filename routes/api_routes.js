@@ -1,59 +1,47 @@
-const notes_router = require('express').Router();
 const fs = require('fs')
-const path = require('path')
-const db_path = path.join(__dirname, '../db/db.json')
+const data = JSON.parse(fs.readFileSync('./Develop/db/db.json', 'utf8'));
 
-function getNotesData() {
-  return fs.promises.readFile(db_path, 'utf8')
-    .then(data => JSON.parse(data));
-}
+module.exports = function(app) {
 
-// gathers all notes
-// localhost:2222/api/notes
-notes_router.get('/notes', (req, res) => {
-  getNotesData()
-    .then(notes_data => {
-      res.json(notes_data)
-    })
-    .catch(err => console.log(err));
-});
+  // gathers all notes
+  // localhost:2222/api/notes
+  app.get('/api/notes', (req, res) => {
+    getNotesData()
+      .then(notes_data => {
+        res.json(notes_data)
+      })
+      .catch(err => console.log(err));
+  });
 
-// creates a new note
-notes_router.post('/notes', (req, res) => {
-  getNotesData()
-    .then(notes_data => {
-      const new_note = req.body;
-      const note_id = notes_data.length ? notes_data[notes_data.length - 1].id : 0;
-      new_note.id = note_id + 1
-      
-      notes_data.push(new_note);
+  // creates a new note
+  app.post('/api/notes', (req, res) => {
+    getNotesData()
+      .then(notes_data => {
+        const new_note = req.body;
+        const note_id = notes_data.length ? notes_data[notes_data.length - 1].id : 0;
+        new_note.id = note_id + 1
 
-      fs.promises.writeFile(db_path, JSON.stringify(notes_data, null, 2))
-        .then(() => {
-          res.json(notes_data);
-        })
-        .catch(err => console.log(err));
-    })
-})
+        notes_data.push(new_note);
 
-// Deletes a note
-notes_router.delete('/notes', (req, res) => {
-  getTodoData()
-    .then(notes => {
-      const id = req.body.id;
-      const obj = notes.find(note => note.id === id);
-      const index = notes.indexOf(obj);
+        fs.writeFileSync('./Develop/db/db.json', JSON.stringify(data), function(err) {
+          if(err) throw(err);
+        });
+        res.json(data);
+      })
+  })
 
-      notes.splice(index, 1);
+  // Deletes a note
+  app.delete('/api/notes', (req, res) => {
+    getNotesData()
+      .then(notes => {
+        const id = req.body.id;
+        const obj = notes.find(note => note.id === id);
+        const index = notes.indexOf(obj);
 
-      fs.promises.writeFile(db_path, JSON.stringify(notes, null, 2))
-        .then(() => {
-          res.json(notes);
-        })
-        .catch(err => console.log(err));
+        notes.splice(index, 1);
+
+        fs.writeFileSync('./Develop/db/db.json', JSON.stringify(data));
+        res.json(data)
       });
-});
-
-
-
-module.exports = notes_router;
+  });
+}

@@ -1,22 +1,18 @@
 const express = require('express');
 const app = express();
+const fs = require('fs');
 const PORT = process.env.PORT || 2222;
-const path = require('path');
 
-const notes_router = require('./routes/api_routes')
-
-//share static/browser files
-app.use(express.static(path.join(__dirname, 'public')));
 //Attach client side form data to the request.body object
 app.use(express.urlencoded({ extended: true }));
 // Allow json data to be received from the client
 app.use(express.json());
+//gathers the data for express parsing
+app.use('/Develop/public/assets', express.static('./assets'))
 
-app.use("/assets", express.static("./assets"));
-
-
+// Loads Routes
 require("./routes/html_routes")(app)
-app.use('/notes', notes_router);
+require("./routes/api_routes")(app);
 
 // Start Server
 app.listen(PORT, () => {
